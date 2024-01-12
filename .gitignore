@@ -1,0 +1,7 @@
+/target
+Cargo.toml
+.gitignore
+.idea/.idea.input_stream.dir/.idea/encodings.xml
+.idea/.idea.input_stream.dir/.idea/indexLayout.xml
+.idea/.idea.input_stream.dir/.idea/vcs.xml
+src/main.rs
