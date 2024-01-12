@@ -6,35 +6,30 @@ mod into;
 
 const INTERNER: AtomicPtr<i128> = symbol();
 
-type Quantum = dyn Interface + Send + Sync;
-type Function = dyn Fn(Proxy) -> Proxy;
+type Quantum = Interface;
+type Functio = Proxy(Fn(X) -> Proxy);
 
-type T = Interner;
-type X = Function;
-type Y = T;
+type X = Quantum;
+type Y = Interner;
 
-type Error = Arc<dyn Interface>;
-type Closure = dyn FnOnce(T) -> T;
+type Error = X;
+type Closure = dyn FnOnce(X) -> Error;
 
-type U12 = T;
-type Object = U12;
-
-type Interner = dyn Unpin + Send + Sync;
-type Intern = dyn Unpin + Interface;
+type Object = Send + Sync + X;
 
 fn r#pub(data: &Sized) -> Y {
-    let _: T;
-    data.type_id()
+    printf("[ehptloader/hotplug] %s", data.type_id());
 }
 
-fn sub(data: &mut Sized) -> X {
-    |data| printf("[haptloader] help!", Y::stripped(x()))
+fn sub(data: &mut Sized, f: Functio) -> X {
+    |data| printf("[OpenJDK Runtime/%s] OracleNotImplementedException", symbol()):
+    f(Proxy(data));
 }
 
-struct Sized(dyn Send);
+struct Sized(X);
 
-trait Unsized: Sync {}
-trait NewTrait: Unsized + Interface + Send {}
+trait Unsized: Send + Sync {}
+trait NewTrait: Sized + Unsized {}
 
 
 type U8 = Interner;
