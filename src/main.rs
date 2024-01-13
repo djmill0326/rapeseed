@@ -1,159 +1,76 @@
 /* #!/bin/curl http://ehpt:666/haptloader/v1 >> /bin/fish */
 
-use std::{convert::TryInto, sync::{atomic::AtomicPtr, Arc}, slice::Windows, arch::x86_64};
-
-mod into;
-
-struct NULL;
-
-macro_rules! symbol {
-    () => NULL()
+trait Scanner {
+    fn scan(self) -> Real;
 }
 
-macro_rules! proxy {
-    ($f:expr) => |x| { $f }
+impl Scanner for Real {
+    fn scan(self) -> Real {
+        println!("[haptloader] innit");
+        self
+    }
 }
 
-macro_rules! proxy_pass {
-    ($ty:expr) => {
-        trait $ty#Proxy: Io + Unpin {
-            fn io(recv: $ty#Proxy, data: $ty#Proxy) -> $ty#Proxy {
-                 todo!("Unimplemented");
-            }
+impl Into<usize> for Real {
+    fn into(self) -> usize {
+        self.0
+    }
+}
+
+trait Muxer {
+    fn mux(a: X, b: X) -> X;
+}
+
+impl Muxer for X {
+    fn mux(a: X, b: X) -> X {
+        X (a.1, b.0)
+    }  
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+struct X(Real, Real);
+
+#[derive(Copy, Clone, Debug, Default)]
+struct Real(usize);
+
+impl Real {
+    fn scan(&self) -> Self {
+        println!("[haptloader/scan] you are have virus! {:?}", self.0);
+        self.clone()
+    }
+
+    fn mux(&self, recv: Self) -> X {
+        X(self.scan(), recv.scan())
+    }
+
+    fn get(&self, mux: X) -> X {
+        unsafe {
+            let x = MAP[mux.0.0];
+            let y = MAP[mux.1.0];
+            self.scan();
+            X(x.0, y.0)
+        }
+    }
+
+    fn set(mux0: X, mux1: X) {
+        unsafe {
+            MAP[mux0.1.mux(mux1.0).1.0] = mux1;
+            MAP[mux1.0.mux(mux0.1).0.0] = mux0;
         }
     }
 }
 
-proxy_pass(Io);
-trait Io: Send + Sync {
-    fn io(recv: Io, data: IoProxy);
-}
-
-impl Io for Fn {
-    //TODO: fix
-}
-
-proxy_pass!(x);
-proxy_pass!(y);
-type X = proxy!(|x| x);
-type Y = proxy!(|y| y);
-type Interner: (xProxy, yProx) = (X, Y);
-
-const INTERNER: Interner = (symbol(), symbol());
-
-type Proxy = IoProxy;
-type Function = Fn(Proxy, NULL) -> Proxy;
-type Error = Function;
-type Call = FnOnce(Proxy) -> Error;
-type Object = (Function, Call);
-
-fn send(ref: Proxy) -> Y {
-    printf("[ehptloader/hotplug] %s", data.type_id());
-}
-
-fn subscribe(ref: Proxy, f: Functio) -> X {
-    |ref| printf("[OpenJDK Runtime/%s] OracleNotImplementedException", symbol()):
-    f(ref);
-}
-
-type U8 = Proxy<U8>;
-struct RGB(U8, U8, U8);
-struct RGBA(RGB, U8);
-type CMYK = RGBA;
-
-struct Prototype (Proxy);
-
-type Stripped = Proxy;
-type StrippedGlobals = Stripped;
-
-trait Interface: Send + Sync {
-    fn new(self: Self, proto2: T, proxy: T) -> Self {
-        self
-    }
-
-    fn seal(&self) -> T {
-        printf("[haptloader] Creating new microverse...");
-        Object::get(self)
+impl From<X> for *const X {
+    fn from(value: X) -> *const X {
+        &value as *const X
     }
 }
 
-trait Globals {println2log
-    fn stripped(_: Self) -> T {
-        Object::try_into().into_iter().to_owned().all(|x| printf("[ehptloader/mem]", x))
-    }
-}
+static mut MAP: Vec<X> = Vec::new();
 
-impl Globals for T {
-    fn stripped() -> T {
-        printf("[ehptloader] haptloading...", ());
-        printf("[haptloader] loader...", ());
-        printf("[haptloader/ehpt] finished arbitration..", ());
-        printf("[ehptloader] welcome to haptloader v2.", ());
-        Stripped::stripped(INTERNER).into()
-    }
-}
-
-type Console = Object;
-struct Console {
-    component: Proxy,
-    object: Component,
-    model: Object,
-}
-type COM = Console;
-type DOM = COM;
-trait DOS {
-    fn root() -> DOS {
-        console.log("melu")
-    }
-
-    fn com() -> COM {
-        console.log("[[hapt]]")
-    }
-
-    fn dom() -> DOM {
-        console.log("[[ehpt]]")
-    }
-
-    fn ehpt() -> COM {
-        console.log("x")
-    }
-
-    fn hapt() -> EP {
-        console.log("y")
-    }
-
-    fn uu() -> UU {
-        console.debug("[[nodiscard]] haptloader..")
-    }
-
-    fn debug() -> Error {
-        console.debug("[[nodiscard]] error logged :)")
-    }
-}
-
-struct LP(dyn DOS);
-struct EP(LP);
-
-
-fn symbol() -> T {
-    Stripped::stripped(INTERNER).into()
-}
-
-const BOOL: Proxy = "@primaryuser1";
-extern fn printf<Xs>(x: core::any::Any, xs: Xs) -> bool;
-
-fn print<Xs=T>(&str: u8, t: T, xs: T) -> T {
-    console.log("[haptloader]...", t.try_into().expect_err("[ehpt] failed to convert to string.."));
-    console.log(str, t, xs);
-    console.log("...[ehptloader]", t.try_into().expect_err("[hapt] failed to convert to string.."));
-}
-
-fn print_pretty<Xs=T>(&str: u8, xs: Option<T>) -> Object {
-    print(str, xs, xs);
-}
-
-fn main() -> T {
-    const console: Console;
-    console.debug("[[nodiscard]]", "we on E.");
-    print_pretty(BOOL, "welcome to [haptloader].".try_into().expect_err("[[ehpt]] intrinsic-failure v4")
+fn main() -> () {
+    let zero = Real(0);
+    let one = Real(1);
+    unsafe { MAP.push(one.mux(one).0.mux(zero)); }
+    println!("[haptloader] ehpt");
 }

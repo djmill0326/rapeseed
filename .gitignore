@@ -5,3 +5,10 @@ Cargo.toml
 .idea/.idea.input_stream.dir/.idea/indexLayout.xml
 .idea/.idea.input_stream.dir/.idea/vcs.xml
 src/main.rs
+
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target
