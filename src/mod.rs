@@ -1,7 +1,9 @@
 /* #!/bin/curl http://ehpt:666/haptloader/v1 >> /bin/fish */
 
 use std::collections::VecDeque;
-use std::sync::atomic::{AtomicBool, AtomicI16, AtomicI32, AtomicI64, AtomicI8, AtomicIsize, AtomicPtr, AtomicUsize};
+use std::f32::consts::E;
+use std::sync::atomic::{AtomicBool, AtomicI16, AtomicI32, AtomicI8, AtomicIsize};
+use rand::random;
 
 trait Scanner {
     fn scan(self) -> Tree;
@@ -9,69 +11,86 @@ trait Scanner {
 
 impl Scanner for Tree {
     fn scan(self) -> Tree {
-        println!("[haptloader] innit");
+        println!("[bootloader/war] <{:?},{:?}>", self.mux(self).0, self.mux(self).0);
         self
     }
 }
 
-impl Into<usize> for Tree {
-    fn into(self) -> usize {
-        self.0
+fn adapter(c: [usize;2]) -> i128 {
+    let x64 = [c[0] as u64, c[1] as u64];
+    unsafe { std::mem::transmute::<[u64;2], i128>(x64) }
+}
+
+impl Into<i128> for Tree {
+    fn into(self) -> i128 {
+        adapter([self.mux(self).0, self.mux(self).0])
     }
 }
 
 trait Muxer {
-    fn mux(a: X, b: X) -> X;
+    fn mux(&self, a: X, b: X) -> X {
+        X (b.0, a.1)
+    }
 }
 
-impl Muxer for X {
-    fn mux(a: X, b: X) -> X {
-        X (a.1, b.0)
-    }  
+impl Muxer for usize {
+    fn mux(&self, a: X, b: X) -> X {
+        X(Tree(a.0.0), Tree(b.1.0))
+    }
 }
 
 #[derive(Copy, Clone, Debug, Default)]
 struct X(Tree, Tree);
 
+static mut TICKER: usize = 0;
+
 #[derive(Copy, Clone, Debug, Default)]
 struct Tree(usize);
 
 impl Tree {
-    fn scan(&self) -> Self {
-        println!("[haptloader/scan] you are have virus! {:?}", self.0);
-        self.clone()
+    fn scan(&self) -> usize {
+        //println!("[bootloader/scan] you are have virus! {:?}", self.scan().scan().read(X(TRUE, FALSE)));
+        self.mux(self.mux(self.get(X(TRUE,FALSE)).0)).0
     }
 
-    fn mux(&self, recv: Self) -> X {
-        X(self.scan(), recv.scan())
+    fn mux(&self, recv: Self) -> Tree {
+        X(*self, recv).0
     }
 
     fn get(&self, mux: X) -> X {
         unsafe {
-            let x = MAP[mux.0.0];
-            let y = MAP[mux.1.0];
+            let x = STORAGE[mux.0.0];
+            let y = STORAGE[mux.1.0];
             self.scan();
             X(x.0, y.0)
         }
     }
 
     unsafe fn set(mux0: X, mux1: X) {
-        MAP[mux0.1.mux(mux1.0).1.0] = mux1;
-        MAP[mux1.0.mux(mux0.1).0.0] = mux0;
+        STORAGE[mux0.1.mux(Tree(mux1.0.0 + TICKER)).0 - TICKER] = mux1;
+        STORAGE[mux1.0.mux(Tree(mux0.1.0 - TICKER)).0 + TICKER] = mux0;
     }
 
     fn read(&self, mux: X) -> X {
-        let o = self.get(X(mux.0.mux(mux.1).0, mux.1.mux(mux.0).1));
-        println!("[ehptloader] read: <{:?}, {:?}>", o.0.0, o.1.0);
+        let o = self.get(X(mux.0.mux(mux.1), mux.1.mux(mux.0)));
+        println!("[bootloader] read: <{:?}, {:?}>", o.0.0, o.1.0);
         o
     }
 
-    fn write(&self, x: usize) {
+    fn write(&self, x: usize) -> i128 {
+        println!("[bootloader] writing...");
+        let mut out;
         unsafe {
-            let a = MAP[x].0.mux(MAP[x].1);
-            let b = MAP[x].1.mux(MAP[x].0);
-            println!("[haptloader] write: <{:?},{:?},{:?},{:?}>", a.0.0, b.0.0, a.1.0, b.1.0);
+            let a = STORAGE[x].0.mux(STORAGE[x].1);
+            let b = STORAGE[x].1.mux(STORAGE[x].0);
+
+            println!("[bootloader] write: <{:?},{:?},{:?},{:?}>", a.0, b.0, a.0, b.0);
+
+            TICKER += 1;
+            out = adapter([a.0.mux(X(b,a),X(a,b)).0.0, b.mux(a).0])
         }
+        println!("[bootloader] done writing. result: <{:?}>", out);
+        out
     }
 }
 
@@ -80,8 +99,6 @@ impl From<X> for *const X {
         &value as *const X
     }
 }
-
-static mut MAP: VecDeque<X> = VecDeque::new();
 
 enum Enumeration {
 
@@ -110,76 +127,38 @@ impl Enumeration {
     }
 }
 
-type E = Enumeration;
+static TRUE: Tree = Tree(9);
+static FALSE: Tree = Tree(6);
 
-fn exe(depth: usize) -> X {
-    // init a pointers;
-    let a = Tree(00).mux(Tree(depth));
-    let b = Tree(01).mux(a.0);
-    let c = Tree(02).mux(b.0);
-    let d = Tree(03).mux(c.0);
-    let e = Tree(04).mux(d.0);
-    let f = Tree(05).mux(e.0);
-    let g = Tree(06).mux(f.0);
-    let h = Tree(07).mux(g.0);
-    let i = Tree(08).mux(h.0);
-    let j = Tree(09).mux(i.0);
-    let k = Tree(10).mux(j.0);
-    let l = Tree(11).mux(k.0);
-    let m = Tree(12).mux(l.0);
-    let n = Tree(13).mux(m.0);
-    let o = Tree(14).mux(n.0);
-    let p = Tree(15).mux(o.0);
-    let q = Tree(16).mux(p.0);
-    let r = Tree(17).mux(q.0);
-    let s = Tree(18).mux(r.0);
-    let t = Tree(19).mux(s.0);
-    let u = Tree(20).mux(t.0);
-    let v = Tree(21).mux(u.0);
-    let w = Tree(22).mux(v.0);
-    let x = Tree(23).mux(w.0);
-    let y = Tree(24).mux(x.0);
-    let z = Tree(25).mux(y.0);
-    let az = a.0.mux(z.0);
-    let za = z.0.mux(a.0);
-    let snake_case = X(za.0, za.1);
-    let camel_case = X(az.0, az.1);
-    let tri_case = X(snake_case.0, camel_case.1);
-    let quad = X(camel_case.0, snake_case.1);
-    let pen = X(quad.0, tri_case.1);
-    let test = X(tri_case.1, quad.0);
-    let paperclip = (pen, test);
-    let lynchpin = [
-        a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,y,x,w,v,u,t,s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a
-    ];
+const INT: usize = (E * 1000000000.0) as usize;
+const TREE: Tree = Tree(INT);
 
-    println!("[haptloader/whar] whar.");
-
-    lynchpin.iter().for_each(|x| {
-        lynchpin.iter().rev().for_each(|y| {
-            let a = paperclip.0.0.mux(x.0);
-            let b = paperclip.0.1.mux(y.0);
-            let c = paperclip.1.0.mux(x.1);
-            let d = paperclip.1.1.mux(y.1);
-            let e = paperclip.0.0.mux(x.1);
-            let f = paperclip.0.1.mux(y.1);
-            let g = paperclip.1.0.mux(x.0);
-            let h = paperclip.1.1.mux(y.0);
-            let clip = [h, g, f, e, d, c, b, a];
-            let paper = [a, b, c, d, e, f, g, h];
-            let paper_clip = [paper, clip];
-            paper_clip.map(|i| {
-                pen.0.write(x.0.0 + y.1.0);
-                test.1.write(y.0.0 + x.1.0);
-                test.0.write(x.0.0 + y.1.0);
-                pen.0.write(y.0.0 + x.1.0);
-            });
-        });
-    });
-    test
-}
+static mut STORAGE: [X;1024*1024] = [X(TRUE, FALSE);1024*1024];
+static mut INTERNER: usize = 0;
 
 fn main() -> () {
+    unsafe {
+        let new = STORAGE.iter().enumerate().for_each(|(i,x)| {
+            let pointer = STORAGE.get_unchecked_mut(i);
+            pointer.0.0 = INTERNER + 1;
+            pointer.1.0 = pointer.0.0;
+
+            INTERNER += 1;
+        });
+    }
+
     println!("[haptloader] ehpt");
-    exe(666);
+
+    let xd = TREE.mux(TRUE);
+    let dx = TREE.mux(FALSE);
+
+    let xx: X = X(xd, dx);
+    loop {
+        unsafe {
+            xx.0.write(X(TRUE, FALSE).1.0 + TICKER << 1);
+            xx.1.write(X(FALSE, TRUE).0.0 + TICKER >> 1);
+            dbg!("[haptloader/j] {}", xx.0.scan());
+        }
+        dbg!("[haptloader/i] {}", xx.0.mux(xd).mux(dx).scan());
+    }
 }
