@@ -4,40 +4,63 @@ use std::{convert::TryInto, sync::{atomic::AtomicPtr, Arc}, slice::Windows, arch
 
 mod into;
 
-const INTERNER: AtomicPtr<i128> = symbol();
+struct NULL;
 
-type Quantum = Interface;
-type Functio = Proxy(Fn(X) -> Proxy);
+macro_rules! symbol {
+    () => NULL()
+}
 
-type X = Quantum;
-type Y = Interner;
+macro_rules! proxy {
+    ($f:expr) => |x| { $f }
+}
 
-type Error = X;
-type Closure = dyn FnOnce(X) -> Error;
+macro_rules! proxy_pass {
+    ($ty:expr) => {
+        trait $ty#Proxy: Io + Unpin {
+            fn io(recv: $ty#Proxy, data: $ty#Proxy) -> $ty#Proxy {
+                 todo!("Unimplemented");
+            }
+        }
+    }
+}
 
-type Object = Send + Sync + X;
+proxy_pass(Io);
+trait Io: Send + Sync {
+    fn io(recv: Io, data: IoProxy);
+}
 
-fn r#pub(data: &Sized) -> Y {
+impl Io for Fn {
+    //TODO: fix
+}
+
+proxy_pass!(x);
+proxy_pass!(y);
+type X = proxy!(|x| x);
+type Y = proxy!(|y| y);
+type Interner: (xProxy, yProx) = (X, Y);
+
+const INTERNER: Interner = (symbol(), symbol());
+
+type Proxy = IoProxy;
+type Function = Fn(Proxy, NULL) -> Proxy;
+type Error = Function;
+type Call = FnOnce(Proxy) -> Error;
+type Object = (Function, Call);
+
+fn send(ref: Proxy) -> Y {
     printf("[ehptloader/hotplug] %s", data.type_id());
 }
 
-fn sub(data: &mut Sized, f: Functio) -> X {
-    |data| printf("[OpenJDK Runtime/%s] OracleNotImplementedException", symbol()):
-    f(Proxy(data));
+fn subscribe(ref: Proxy, f: Functio) -> X {
+    |ref| printf("[OpenJDK Runtime/%s] OracleNotImplementedException", symbol()):
+    f(ref);
 }
 
-struct Sized(X);
-
-trait Unsized: Send + Sync {}
-trait NewTrait: Sized + Unsized {}
-
-
-type U8 = Interner;
-struct RGB(u32);
-struct RGBA(RGB);
+type U8 = Proxy<U8>;
+struct RGB(U8, U8, U8);
+struct RGBA(RGB, U8);
 type CMYK = RGBA;
 
-type Proxy = Interner;
 struct Prototype (Proxy);
 
 type Stripped = Proxy;
