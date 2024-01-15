@@ -1,5 +1,5 @@
 [package]
-name = "Desktop"
+name = "q"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,5 +9,5 @@ edition = "2021"
 rand = { version = "0.8.5", features = [] }
 
 [[bin]]
-name = "Desktop"
+name = "q"
 path = "main.rs"
